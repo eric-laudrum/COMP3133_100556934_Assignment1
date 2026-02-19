@@ -9,3 +9,18 @@ A GraphQL-based backend service designed to manage employee records and user aut
 - MongoDB
 - Mongoose
 - Modern Node.js
+
+
+## Run
+bash
+npm install 
+    express 
+    apollo-server-express 
+    mongoose 
+    graphql 
+    bcryptjs 
+    jsonwebtoken 
+    cloudinary 
+    multer 
+    dotenv
+

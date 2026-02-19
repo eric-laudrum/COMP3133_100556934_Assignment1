@@ -20,7 +20,28 @@ const employeeResolvers = {
 
         return await Employee.find(filter);
     }
+  },
+
+  Mutation: {
+    addEmployee: async (_, args) => {
+        const newEmp = new Employee(args);
+
+        return await newEmp.save();
+    },
+    updateEmployeeById: async (_, { eid, ...updateData }) => {
+        const updated = await Employee.findByIdAndUpdate(eid, updateData, { new: true });
+        if (!updated) throw new GraphQLError("Update failed");
+
+        return updated;
+    },
+    deleteEmployeeById: async (_, { eid }) => {
+      const deleted = await Employee.findByIdAndDelete(eid);
+      if (!deleted) throw new GraphQLError("Delete failed");
+
+      return "Employee deleted successfully";
+    }
   }
+  
 };
 
 export default employeeResolvers;
