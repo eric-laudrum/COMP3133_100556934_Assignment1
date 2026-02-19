@@ -3,3 +3,9 @@
 ## Eric Laudrum
 ## 100556934
 
+A GraphQL-based backend service designed to manage employee records and user authentication.
+
+## Stack 
+- MongoDB
+- Mongoose
+- Modern Node.js
