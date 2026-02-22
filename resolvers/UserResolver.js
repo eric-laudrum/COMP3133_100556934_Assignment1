@@ -4,19 +4,17 @@ import User from "../models/User.js";
 const userResolvers = {
     Query: {
         login: async( _, {username, email, password}) =>{
+
+            // Check if user exists and handle cases
             const user = await User.findOne({email});
-            
             if(!user){
                 throw new GraphQLError('Error: user not found');
             }
 
-
             const isMatch = await bcrypt.compare(password, user.password);
-
             if(!isMatch){
                 throw new GraphQLError('Error: username or password is incorrect')
             }
-
 
             return user;
         }
