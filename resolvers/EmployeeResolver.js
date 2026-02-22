@@ -13,13 +13,6 @@ const employeeResolvers = {
         return emp;
     },
 
-    searchEmployeeByFilter: async (_, { designation, department }) => {
-        const filter = {};
-        if (designation) filter.designation = designation;
-        if (department) filter.department = department;
-
-        return await Employee.find(filter);
-    }
   },
 
   Mutation: {

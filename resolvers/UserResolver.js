@@ -1,12 +1,14 @@
 import { GraphQLError } from "graphql";
 import User from "../models/User.js";
+import bcrypt from 'bcrypt';
 
 const userResolvers = {
     Query: {
         login: async( _, {username, email, password}) =>{
 
             // Check if user exists and handle cases
-            const user = await User.findOne({email});
+            const user = await User.findOne({username});
+
             if(!user){
                 throw new GraphQLError('Error: user not found');
             }
@@ -21,7 +23,7 @@ const userResolvers = {
   },
 
   Mutation: {
-    signup: async (_, {username, email, passsword }) => {
+    signup: async (_, {username, email, password }) => {
         
         // Check if user already exists
         const existingUser = await User.findOne({
@@ -34,11 +36,11 @@ const userResolvers = {
         }
 
         // Set up new user object.
-        const newUser = new User({username, emaill, password});
-        return await newUser.savE();
+        const newUser = new User({username, email, password});
+        return await newUser.save();
     }
   }
   
 };
 
-export default UserResolvers;
+export default userResolvers;

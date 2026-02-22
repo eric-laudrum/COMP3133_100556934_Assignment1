@@ -19,15 +19,15 @@ export const typeDefs = `#graphql
         employee_photo: String
     }
 
-    type: Query{
+    type Query{
         login( 
             username: String, 
             email: String, 
-            password: String 
-        )}
-
-        getallEmployees: [Employee]
-        searchEmployeesById(eid: ID!): Employee
+            password: String!
+        ): User
+        
+        getEmployees: [ Employee ]
+        searchEmployeeById(eid: ID!): Employee
     }
 
     type Mutation{
@@ -59,10 +59,9 @@ export const typeDefs = `#graphql
             eid: ID!
         ): String
     }
-;
+`;
 
 export default typeDefs;
 
 
 
-`
