@@ -18,7 +18,7 @@ export const employeeResolvers = {
 
   Mutation: {
     addEmployee: async (_, args, context) => {
-        // THE INTERSECTION: Check for JWT
+        // Check JWT
         if (!context.user) throw new GraphQLError("Not Authorized");
 
         try {
