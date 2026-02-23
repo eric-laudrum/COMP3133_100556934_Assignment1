@@ -1,46 +1,52 @@
 import { GraphQLError } from "graphql";
 import User from "../models/User.js";
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const userResolvers = {
     Query: {
-        login: async( _, {username, email, password}) =>{
+        login: async (_, { username, password }) => {
+            const user = await User.findOne({ username });
 
-            // Check if user exists and handle cases
-            const user = await User.findOne({username});
-
-            if(!user){
+            if (!user) {
                 throw new GraphQLError('Error: user not found');
             }
 
             const isMatch = await bcrypt.compare(password, user.password);
-            if(!isMatch){
-                throw new GraphQLError('Error: username or password is incorrect')
+
+            if (!isMatch) {
+                throw new GraphQLError('Error: username or password is incorrect');
             }
 
-            return user;
+            const token = jwt.sign(
+                { userId: user.id },
+                process.env.JWT_SECRET,
+                { expiresIn: '1h' }
+            );
+
+            return {
+                status: true,
+                message: "Login successful",
+                token: token
+            };
+        },
+    },
+
+    Mutation: {
+        signup: async (_, { username, email, password }) => {
+            const existingUser = await User.findOne({
+                $or: [{ email }, { username }]
+            });
+
+            if (existingUser) {
+                throw new GraphQLError('Error: user already exists');
+            }
+
+            const newUser = new User({ username, email, password });
+            
+            return await newUser.save();
         }
-  },
-
-  Mutation: {
-    signup: async (_, {username, email, password }) => {
-        
-        // Check if user already exists
-        const existingUser = await User.findOne({
-            $or: [{email}, {username} ]
-        });
-
-        // Handle cases where user already exists
-        if(existingUser){
-            throw new GraphQLError('Error: user already exists');
-        }
-
-        // Set up new user object.
-        const newUser = new User({username, email, password});
-        return await newUser.save();
     }
-  }
-  
 };
 
 export default userResolvers;

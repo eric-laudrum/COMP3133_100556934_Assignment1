@@ -1,5 +1,11 @@
 export const typeDefs = `#graphql
 
+    type AuthResponse{
+        status: Boolean
+        message: String
+        token: String
+    }
+
     type User{
         id: ID!
         username: String!
@@ -24,7 +30,7 @@ export const typeDefs = `#graphql
             username: String, 
             email: String, 
             password: String!
-        ): User
+        ): AuthResponse
         
         getEmployees: [ Employee ]
         searchEmployeeById(eid: ID!): Employee
@@ -59,9 +65,9 @@ export const typeDefs = `#graphql
             eid: ID!
         ): String
     }
+
+
+
 `;
-
-export default typeDefs;
-
 
 

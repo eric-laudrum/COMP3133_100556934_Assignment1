@@ -1,7 +1,8 @@
 import { GraphQLError } from "graphql";
 import Employee from "../models/Employee.js";
+import cloudinary from "../config/cloudinary.js";
 
-const employeeResolvers = {
+export const employeeResolvers = {
     Query: {
         getEmployees: async () => {
         return await Employee.find({});
@@ -16,25 +17,48 @@ const employeeResolvers = {
   },
 
   Mutation: {
-    addEmployee: async (_, args) => {
-        const newEmp = new Employee(args);
+    addEmployee: async (_, args, context) => {
+        // THE INTERSECTION: Check for JWT
+        if (!context.user) throw new GraphQLError("Not Authorized");
 
-        return await newEmp.save();
+        try {
+            const imageString = args.employee_photo.replace(/^data:image\/\w+;base64,/, "");
+            const uploadResponse = await cloudinary.uploader.upload(`data:image/jpeg;base64,${imageString}`, {});
+
+            if (args.salary < 1000) {
+                throw new GraphQLError("Error: Salary must be a minimum $1000")
+            }
+
+            const newEmp = new Employee({
+                ...args,
+                employee_photo: uploadResponse.secure_url
+            });
+
+            return await newEmp.save();
+        } catch (error) {
+            throw new Error("Error: " + error.message);
+        }
     },
-    updateEmployeeById: async (_, { eid, ...updateData }) => {
-        const updated = await Employee.findByIdAndUpdate(eid, updateData, { new: true });
-        if (!updated) throw new GraphQLError("Update failed");
 
-        return updated;
+    updateEmployeeById: async (_, { eid, salary, designation }, context) => {
+        if (!context.user) throw new GraphQLError("Not Authorized");
+        
+        const updatedEmployee = await Employee.findByIdAndUpdate(
+            eid,
+            { $set: { salary, designation } },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedEmployee) throw new Error("Employee not found");
+        return updatedEmployee;
     },
-    deleteEmployeeById: async (_, { eid }) => {
-      const deleted = await Employee.findByIdAndDelete(eid);
-      if (!deleted) throw new GraphQLError("Delete failed");
 
-      return "Employee deleted successfully";
+    deleteEmployeeById: async (_, { eid }, context) => {
+        if (!context.user) throw new GraphQLError("Not Authorized");
+        
+        const deleted = await Employee.findByIdAndDelete(eid);
+        if (!deleted) throw new GraphQLError("Delete failed");
+        return "Employee deleted successfully";
     }
   }
-  
-};
-
-export default employeeResolvers;
+}
